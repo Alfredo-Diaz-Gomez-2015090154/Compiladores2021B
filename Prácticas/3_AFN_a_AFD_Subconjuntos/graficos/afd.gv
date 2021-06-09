@@ -1,0 +1,14 @@
+digraph G {
+ rankdir=LR;
+ I [ label = "I", style = invis];
+ A_0 [ shape = doublecircle ];
+ B_0 [ shape = doublecircle ];
+ C_0 [ shape = doublecircle ];
+ I -> A_0;
+ A_0 -> B_0 [ label = "a"]; 
+ A_0 -> C_0 [ label = "b"]; 
+ B_0 -> B_0 [ label = "a"]; 
+ B_0 -> C_0 [ label = "b"]; 
+ C_0 -> B_0 [ label = "a"]; 
+ C_0 -> C_0 [ label = "b"]; 
+}

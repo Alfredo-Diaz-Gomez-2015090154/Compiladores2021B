@@ -1,0 +1,27 @@
+digraph G {
+ rankdir=LR;
+ I [ label = "I", style = invis];
+ 1 [ shape = circle ];
+ 2 [ shape = circle ];
+ 3 [ shape = circle ];
+ 4 [ shape = circle ];
+ 5 [ shape = circle ];
+ 6 [ shape = circle ];
+ 7 [ shape = circle ];
+ 8 [ shape = circle ];
+ 9 [ shape = circle ];
+ 10 [ shape = doublecircle ];
+ I -> 1;
+ 2 -> 3 [ label = "a"]; 
+ 3 -> 4 [ label = "b"]; 
+ 5 -> 6 [ label = "c"]; 
+ 6 -> 5 [ label = "E"]; 
+ 6 -> 7 [ label = "E"]; 
+ 4 -> 5 [ label = "E"]; 
+ 4 -> 7 [ label = "E"]; 
+ 8 -> 9 [ label = "E"]; 
+ 1 -> 2 [ label = "E"]; 
+ 1 -> 8 [ label = "E"]; 
+ 7 -> 10 [ label = "E"]; 
+ 9 -> 10 [ label = "E"]; 
+}
