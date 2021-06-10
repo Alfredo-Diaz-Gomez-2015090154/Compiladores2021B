@@ -56,7 +56,8 @@ class GIC:
             elif X[0] in self.no_terminales:
                 for produccion in self.producciones:
                     if X[0] == produccion[0]:
-                        conjunto_primero = conjunto_primero.union(self.primero(produccion[1]))
+                        if produccion[1][0] != X[0]:
+                            conjunto_primero = conjunto_primero.union(self.primero(produccion[1]))
 
                 return conjunto_primero
 
@@ -69,24 +70,24 @@ class GIC:
 
         for produccion in self.producciones:
             
-            if produccion[0] != no_terminal:
+            indices_simbolo = [i for i, x in enumerate(produccion[1]) if x == no_terminal]
+        
+            if len(indices_simbolo) > 0:
 
-                indices_simbolo = [i for i, x in enumerate(produccion[1]) if x == no_terminal]
-            
-                if len(indices_simbolo) > 0:
+                for i in indices_simbolo:
 
-                    for i in indices_simbolo:
-
-                        if i == len(produccion[1]) - 1:
+                    if i == len(produccion[1]) - 1:
+                        if no_terminal != produccion[0]:    # Comprobar la recursión.
                             conjunto_siguiente = conjunto_siguiente.union(self.siguiente(produccion[0]))
-                        else:
-                            primero_beta = self.primero(produccion[1][i+1:])
-                            
-                            if '' in primero_beta:
-                                conjunto_siguiente = conjunto_siguiente.union(primero_beta - {''})
+                    else:
+                        primero_beta = self.primero(produccion[1][i+1:])
+                        
+                        if '' in primero_beta:
+                            conjunto_siguiente = conjunto_siguiente.union(primero_beta - {''})
+                            if no_terminal != produccion[0]:    # Comprobar la recursión.
                                 conjunto_siguiente = conjunto_siguiente.union(self.siguiente(produccion[0]))
-                            else:
-                                conjunto_siguiente = conjunto_siguiente.union(primero_beta)
-                                conjunto_siguiente = conjunto_siguiente.union(primero_beta)
+                        else:
+                            conjunto_siguiente = conjunto_siguiente.union(primero_beta)
+                            conjunto_siguiente = conjunto_siguiente.union(primero_beta)
 
         return conjunto_siguiente

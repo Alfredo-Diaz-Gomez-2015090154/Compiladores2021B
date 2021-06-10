@@ -30,8 +30,8 @@ def main():
         ('B', ['']),
     ]
     inicial = 'S'
-    cadena_prueba = '0 1 1 1'.split()
-    """
+    cadena = '0 1 1 1'"""
+    
 
     # Ejemplo 3
     """no_terminales = ['S', 'A', 'B', 'D']
@@ -45,9 +45,7 @@ def main():
         ('D', [''])
     ]
     inicial = 'S'
-    cadena_prueba = 'b d'.split()
-    """
-    #print(cadena_prueba)
+    cadena = 'b d'"""
 
     # Ejemplo 4
     """no_terminales = ['S', 'X']
@@ -58,9 +56,7 @@ def main():
         ('X', ['y'])
     ]
     inicial = 'S'
-    cadena_prueba = 'x x x y x x x'.split()
-    print(cadena_prueba)
-    """
+    cadena = 'x x x y x x x y' """
 
     # Ejemplo 5
     """no_terminales = ['S', 'X']
@@ -72,8 +68,22 @@ def main():
         ('X', [''])
     ]
     inicial = 'S'
-    cadena = '1 1 1'
-    """
+    cadena = '1 1 1'"""
+    
+
+    # Ejemplo 6
+    """no_terminales = ['E', 'T', 'F']
+    terminales = ['+', '*', '(', ')', 'id']
+    producciones = [
+        ('E', ['E', '+', 'T']),
+        ('E', ['T']),
+        ('T', ['T', '*', 'F']),
+        ('T', ['F']),
+        ('F', ['(', 'E', ')']),
+        ('F', ['id']),
+    ]
+    inicial = 'E'
+    cadena = 'id'"""
 
 
     gic = GIC(terminales, no_terminales, inicial, producciones)
