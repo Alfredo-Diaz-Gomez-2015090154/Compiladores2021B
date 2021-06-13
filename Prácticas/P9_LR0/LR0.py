@@ -54,11 +54,15 @@ def cerradura(subconjunto, gic):
                     for i, produccion in enumerate(gic.producciones):
                         
                         if produccion[0] == sig_elemento:
-                        
-                            produccion_lst = copy(produccion[1])
 
-                            produccion_lst.insert(0, '.')
-                            cadena_produccion = lista_a_str(produccion_lst)
+                            # Verificar si produce Épsilon.
+                            if len(produccion[1]) == 1 and produccion[1][0] == '':
+                                produccion_lst = ['.']
+                                cadena_produccion = '.'
+                            else:                        
+                                produccion_lst = copy(produccion[1])
+                                produccion_lst.insert(0, '.')
+                                cadena_produccion = lista_a_str(produccion_lst)
 
                             nuevo_lr0 = ElementoLR0(sig_elemento, cadena_produccion, produccion_lst, 0, i)
                             subconjunto_c.add(nuevo_lr0)
@@ -107,7 +111,21 @@ class TablaLR0:
 
     def llenar(self, gic):
 
-        elemento_inicial = ElementoLR0("S'", '. S ', ['.', 'S'], 0, -1)
+        #print("--------------------------------------------")
+        # Extendiendo la gramática.
+        n_term_extendido = gic.inicial + "'"
+        is_repetido = False
+        if n_term_extendido in gic.no_terminales:
+            is_repetido = True
+            #print("Ya está")
+        
+        while is_repetido:
+            n_term_extendido += "'"
+            if n_term_extendido not in gic.no_terminales:
+                is_repetido = False
+
+        elemento_inicial = ElementoLR0(n_term_extendido, f'. {gic.inicial}', ['.', gic.inicial], 0, -1)
+        #print("--------------------------------------------")
 
         subconjunto_0 = set()
         subconjunto_0.add(elemento_inicial)
@@ -173,11 +191,12 @@ class TablaLR0:
 
                     if terminal not in self.filas[subconjuntos[i_subconjunto].numero].keys():
                         self.filas[subconjuntos[i_subconjunto].numero][terminal] = []
-                        print(f"NO existente: {i_subconjunto}, {terminal}")
-                        print(self.filas[subconjuntos[i_subconjunto].numero][terminal])
+                        #print(f"NO existente: {i_subconjunto}, {terminal}")
+                        #print(self.filas[subconjuntos[i_subconjunto].numero][terminal])
                     else:
-                        print("Existente: ")
-                        print(self.filas[subconjuntos[i_subconjunto].numero][terminal])
+                        #print("Existente: ")
+                        #print(self.filas[subconjuntos[i_subconjunto].numero][terminal])
+                        pass
 
                     if not sub_existe:
                         conteo_subconjuntos += 1
@@ -195,17 +214,18 @@ class TablaLR0:
             for lr0 in subconjunto.elementos_LR0:
                 if lr0.punto_pos == len(lr0.p_lista) - 1:
                     #print(f"Final: {lr0.num_produccion}) {lr0.no_terminal} -> {lr0.p_cadena}")
-                    if lr0.num_produccion == -1:
+                    if lr0.num_produccion == -1 and f"{gic.inicial} . " == lr0.p_cadena:
+                        
                         self.filas[subconjunto.numero]['$'] = 'acc'
                     else:
                         #print(f'Siguiente({lr0.no_terminal}) = {gic.siguiente(lr0.no_terminal)}')
 
                         siguiente_no_terminal = gic.siguiente(lr0.no_terminal)
-                        print(f"S({lr0.no_terminal}) = {siguiente_no_terminal} ")
+                        #print(f"S({lr0.no_terminal}) = {siguiente_no_terminal} ")
                         for sig in siguiente_no_terminal:
                             if sig not in self.filas[subconjunto.numero].keys():
                                 self.filas[subconjunto.numero][sig] = []
-                                print(f"No existe: {subconjunto.numero} {sig}")
+                                #print(f"No existe: {subconjunto.numero} {sig}")
                             self.filas[subconjunto.numero][sig].append('r'+str(lr0.num_produccion))
 
         #for sub in self.filas.keys():

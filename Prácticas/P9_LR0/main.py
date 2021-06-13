@@ -99,6 +99,17 @@ def main():
     inicial = 'E'
     cadena = 'id'"""
 
+    # Ejemplo 8
+    """no_terminales = ["S'", "S''"]
+    terminales = ['a', 'b']
+    producciones = [
+        ("S'", ["S''", "S''"]),
+        ("S''", ['a', "S''"]),
+        ("S''", ['b'])
+    ]
+    inicial = "S'"
+    cadena = 'id'"""
+    
     gic = GIC(terminales, no_terminales, inicial, producciones)
 
     print("Gramática: ")
@@ -111,11 +122,11 @@ def main():
     print("Tabla LR(0): ")
     tablaLR0.imprimir(gic)
 
-    for subconjunto in tablaLR0.subconjuntos:
+    """for subconjunto in tablaLR0.subconjuntos:
         print(f'{subconjunto.numero})  ', end='')
         for elemento in subconjunto.elementos_LR0:
             print(f'{elemento.no_terminal} -> {elemento.p_cadena}  ', end='')
-        print()
+        print()"""
 
 
 if __name__ == "__main__":
