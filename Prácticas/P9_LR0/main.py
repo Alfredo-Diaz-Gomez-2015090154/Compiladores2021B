@@ -30,7 +30,7 @@ def main():
         ('B', ['']),
     ]
     inicial = 'S'
-    cadena = '0 1 1 1'
+    cadena = '0 0 0'
     
 
     # Ejemplo 3
@@ -127,6 +127,8 @@ def main():
         for elemento in subconjunto.elementos_LR0:
             print(f'{elemento.no_terminal} -> {elemento.p_cadena}  ', end='')
         print()"""
+    
+    tablaLR0.analisis_LR0(gic, cadena)
 
 
 if __name__ == "__main__":

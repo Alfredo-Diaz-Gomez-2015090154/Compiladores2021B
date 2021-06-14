@@ -216,7 +216,7 @@ class TablaLR0:
                     #print(f"Final: {lr0.num_produccion}) {lr0.no_terminal} -> {lr0.p_cadena}")
                     if lr0.num_produccion == -1 and f"{gic.inicial} . " == lr0.p_cadena:
                         
-                        self.filas[subconjunto.numero]['$'] = 'acc'
+                        self.filas[subconjunto.numero]['$'] = ['acc']
                     else:
                         #print(f'Siguiente({lr0.no_terminal}) = {gic.siguiente(lr0.no_terminal)}')
 
@@ -271,3 +271,50 @@ class TablaLR0:
                     print(f'{"" : <8}', end='')
 
             print()                            
+
+    def analisis_LR0(self, gic, entrada):
+        
+        #print(type(self.subconjuntos))
+
+        #for subconjunto in self.subconjuntos:
+        #    print(subconjunto.numero)
+
+        entrada_extendida = entrada.split()
+        entrada_extendida.append('$')
+        i_entrada = 0
+        pila = [self.subconjuntos[0].numero]
+        print(entrada_extendida)
+
+        #print(pila[0])
+        
+        while True:
+            print("Pila: ", pila)
+            print("Cadena: ", entrada_extendida[i_entrada:])
+            sim_cadena = entrada_extendida[i_entrada]
+            if sim_cadena not in self.filas[pila[-1]]:
+                print("Error")
+                return
+
+            if len(self.filas[pila[-1]][sim_cadena]) > 1:
+                print(self.filas[pila[-1]][sim_cadena])
+                print("Entrada múltiple")
+                return
+
+            if self.filas[pila[-1]][sim_cadena][0][0] == 'd':
+                print("Desplazamiento")
+                i_entrada += 1
+                pila.append(int(self.filas[pila[-1]][sim_cadena][0][1:]))
+            elif self.filas[pila[-1]][sim_cadena][0][0] == 'r':
+                num_produccion = int(self.filas[pila[-1]][sim_cadena][0][1:])
+                print(f"Reducción. Prod: {num_produccion} ")
+                print(f"{gic.producciones[num_produccion][0]} -> {gic.producciones[num_produccion][1]}")
+                if not (len(gic.producciones[num_produccion][1]) == 1 and gic.producciones[num_produccion][1][0] == ''):
+                    print("No es E. :D")
+                    for i in range(len(gic.producciones[num_produccion][1])):
+                        pila.pop()
+                pila.append(self.filas[pila[-1]][gic.producciones[num_produccion][0]][0])
+                    
+            elif self.filas[pila[-1]][sim_cadena][0] == 'acc':
+                print("Aceptar")
+                return
+
