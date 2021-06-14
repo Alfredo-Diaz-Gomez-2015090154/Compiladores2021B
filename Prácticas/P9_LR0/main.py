@@ -5,7 +5,7 @@ from LR0 import cerradura, mover, ElementoLR0, SubconjuntoLR0, TablaLR0
 def main():
 
     #Ejemplo 1:
-    """no_terminales = ["E", "E'", "T", "T'", "F"]
+    no_terminales = ["E", "E'", "T", "T'", "F"]
     terminales = ['+', '*', '(', ')', 'id']
     producciones = [
         ('E', ['T', "E'"]), 
@@ -15,11 +15,11 @@ def main():
         ("F", ['(', 'E', ')']), ("F", ['id']),
         ]
     inicial = 'E'
-    cadena = '( id + id * id ) + id'"""
+    cadena = '( id + id * id ) + id'
     
 
     #Ejemplo 2:
-    no_terminales = ['S', 'A', 'B']
+    """no_terminales = ['S', 'A', 'B']
     terminales = ['1', '0']
     producciones = [
         ('S', ['A', '1', 'B']),
@@ -30,7 +30,7 @@ def main():
         ('B', ['']),
     ]
     inicial = 'S'
-    cadena = '0 0 0'
+    cadena = '1 0 0 0'"""
     
 
     # Ejemplo 3
@@ -108,7 +108,7 @@ def main():
         ("S''", ['b'])
     ]
     inicial = "S'"
-    cadena = 'id'"""
+    cadena = 'a a b a b'"""
     
     gic = GIC(terminales, no_terminales, inicial, producciones)
 

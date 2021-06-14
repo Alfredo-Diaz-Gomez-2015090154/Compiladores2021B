@@ -109,6 +109,53 @@ class TablaLR0:
     def __init__(self):
         self.filas = dict()
 
+    def mover_conjunto_simbolos(self, gic, is_terminales, subconjuntos, i_subconjunto, conteo_subconjuntos):
+        """
+        Calcula Mover de los subconjuntos encontrados y los símbolos de la gramática.
+        is_terminales: Define si se está moviendo con terminales o no terminales.
+        """
+
+        if is_terminales:
+            conjunto_simbolos = gic.terminales
+        else:
+            conjunto_simbolos = gic.no_terminales
+
+        for simbolo in conjunto_simbolos:
+            kernel = mover(subconjuntos[i_subconjunto].elementos_LR0, simbolo)
+            if len(kernel) > 0:
+                kernel_str = set()
+                for ele_lr0 in kernel:
+                    kernel_str.add(f'{ele_lr0.no_terminal} -> {ele_lr0.p_cadena}')
+                
+                sub_existe = False
+                numero_subconjunto_previo = -1
+                for subconjunto in subconjuntos:
+                    if subconjunto.kernel == kernel_str:
+                        sub_existe = True
+                        numero_subconjunto_previo = subconjunto.numero
+                        break
+
+                if simbolo not in self.filas[subconjuntos[i_subconjunto].numero].keys():
+                    self.filas[subconjuntos[i_subconjunto].numero][simbolo] = []                        
+
+                if is_terminales:
+                    if not sub_existe:
+                        conteo_subconjuntos += 1
+                        subconjuntos.append(SubconjuntoLR0(kernel_str, cerradura(kernel, gic), conteo_subconjuntos))
+                        self.filas[subconjuntos[i_subconjunto].numero][simbolo].append('d'+str(conteo_subconjuntos))
+                    else:
+                        self.filas[subconjuntos[i_subconjunto].numero][simbolo].append('d'+str(numero_subconjunto_previo))
+
+                else:
+                    if not sub_existe:
+                        conteo_subconjuntos += 1
+                        subconjuntos.append(SubconjuntoLR0(kernel_str, cerradura(kernel, gic), conteo_subconjuntos))
+                        self.filas[subconjuntos[i_subconjunto].numero][simbolo] = [conteo_subconjuntos]
+                    else:
+                        self.filas[subconjuntos[i_subconjunto].numero][simbolo] = [numero_subconjunto_previo]
+
+        return conteo_subconjuntos       
+
     def llenar(self, gic):
 
         #print("--------------------------------------------")
@@ -143,68 +190,8 @@ class TablaLR0:
             if subconjuntos[i_subconjunto].numero not in self.filas.keys():
                 self.filas[subconjuntos[i_subconjunto].numero] = {}
 
-            for no_terminal in gic.no_terminales:
-                kernel = mover(subconjuntos[i_subconjunto].elementos_LR0, no_terminal)
-                if len(kernel) > 0:
-                    #print("Si pasa")
-                    kernel_str = set()
-                    for ele_lr0 in kernel:
-                        kernel_str.add(f'{ele_lr0.no_terminal} -> {ele_lr0.p_cadena}')
-                    
-                    #print(kernel_str)
-                    sub_existe = False
-                    numero_subconjunto_previo = -1
-                    for subconjunto in subconjuntos:
-                        if subconjunto.kernel == kernel_str:
-                            sub_existe = True
-                            numero_subconjunto_previo = subconjunto.numero
-                            break
-
-                    if no_terminal not in self.filas[subconjuntos[i_subconjunto].numero].keys():
-                        self.filas[subconjuntos[i_subconjunto].numero][no_terminal] = []                        
-
-                    if not sub_existe:
-                        conteo_subconjuntos += 1
-                        #print(f"No existe. Calcular cerradura : {conteo_subconjuntos}")                    
-                        subconjuntos.append(SubconjuntoLR0(kernel_str, cerradura(kernel, gic), conteo_subconjuntos))
-                        
-                        self.filas[subconjuntos[i_subconjunto].numero][no_terminal] = [conteo_subconjuntos]
-                    else:
-                        self.filas[subconjuntos[i_subconjunto].numero][no_terminal] = [numero_subconjunto_previo]
-
-            for terminal in gic.terminales:
-                kernel = mover(subconjuntos[i_subconjunto].elementos_LR0, terminal)
-                if len(kernel) > 0:
-                    #print("Si pasa")
-                    kernel_str = set()
-                    for ele_lr0 in kernel:
-                        kernel_str.add(f'{ele_lr0.no_terminal} -> {ele_lr0.p_cadena}')
-                    
-                    #print(kernel_str)
-                    sub_existe = False
-                    numero_subconjunto_previo = -1
-                    for subconjunto in subconjuntos:
-                        if subconjunto.kernel == kernel_str:
-                            numero_subconjunto_previo = subconjunto.numero
-                            sub_existe = True
-                            break
-
-                    if terminal not in self.filas[subconjuntos[i_subconjunto].numero].keys():
-                        self.filas[subconjuntos[i_subconjunto].numero][terminal] = []
-                        #print(f"NO existente: {i_subconjunto}, {terminal}")
-                        #print(self.filas[subconjuntos[i_subconjunto].numero][terminal])
-                    else:
-                        #print("Existente: ")
-                        #print(self.filas[subconjuntos[i_subconjunto].numero][terminal])
-                        pass
-
-                    if not sub_existe:
-                        conteo_subconjuntos += 1
-                        #print(f"No existe. Calcular cerradura : {conteo_subconjuntos}")
-                        subconjuntos.append(SubconjuntoLR0(kernel_str, cerradura(kernel, gic), conteo_subconjuntos))
-                        self.filas[subconjuntos[i_subconjunto].numero][terminal].append('d'+str(conteo_subconjuntos))
-                    else:
-                        self.filas[subconjuntos[i_subconjunto].numero][terminal].append('d'+str(numero_subconjunto_previo))                
+            conteo_subconjuntos = self.mover_conjunto_simbolos(gic, False, subconjuntos, i_subconjunto, conteo_subconjuntos)
+            conteo_subconjuntos = self.mover_conjunto_simbolos(gic, True, subconjuntos, i_subconjunto, conteo_subconjuntos)
 
             i_subconjunto += 1  
 
@@ -279,42 +266,46 @@ class TablaLR0:
         #for subconjunto in self.subconjuntos:
         #    print(subconjunto.numero)
 
+        print()
+        print("Análisis LR(0)")
+
         entrada_extendida = entrada.split()
         entrada_extendida.append('$')
         i_entrada = 0
         pila = [self.subconjuntos[0].numero]
-        print(entrada_extendida)
+        
+        print(f"Cadena: {lista_a_str(entrada_extendida)}")
 
         #print(pila[0])
         
         while True:
-            print("Pila: ", pila)
-            print("Cadena: ", entrada_extendida[i_entrada:])
+            #print("Pila: ", pila)
+            #print("Cadena: ", entrada_extendida[i_entrada:])
             sim_cadena = entrada_extendida[i_entrada]
             if sim_cadena not in self.filas[pila[-1]]:
-                print("Error")
+                print("Error. La cadena no pertenece a L(G).")
                 return
 
             if len(self.filas[pila[-1]][sim_cadena]) > 1:
                 print(self.filas[pila[-1]][sim_cadena])
-                print("Entrada múltiple")
+                print("Entrada múltiple. No se puede determinar si la cadena pertenece o no a L(G).")
                 return
 
             if self.filas[pila[-1]][sim_cadena][0][0] == 'd':
-                print("Desplazamiento")
+                #print("Desplazamiento")
                 i_entrada += 1
                 pila.append(int(self.filas[pila[-1]][sim_cadena][0][1:]))
             elif self.filas[pila[-1]][sim_cadena][0][0] == 'r':
                 num_produccion = int(self.filas[pila[-1]][sim_cadena][0][1:])
-                print(f"Reducción. Prod: {num_produccion} ")
-                print(f"{gic.producciones[num_produccion][0]} -> {gic.producciones[num_produccion][1]}")
+                print(f"Reducción con {gic.producciones[num_produccion][0]} -> {lista_a_str(gic.producciones[num_produccion][1])} ")
+                #print(f"{gic.producciones[num_produccion][0]} -> {gic.producciones[num_produccion][1]}")
                 if not (len(gic.producciones[num_produccion][1]) == 1 and gic.producciones[num_produccion][1][0] == ''):
-                    print("No es E. :D")
+                    #print("No es E. :D")
                     for i in range(len(gic.producciones[num_produccion][1])):
                         pila.pop()
                 pila.append(self.filas[pila[-1]][gic.producciones[num_produccion][0]][0])
                     
             elif self.filas[pila[-1]][sim_cadena][0] == 'acc':
-                print("Aceptar")
+                print("Cadena aceptada.")
                 return
 
