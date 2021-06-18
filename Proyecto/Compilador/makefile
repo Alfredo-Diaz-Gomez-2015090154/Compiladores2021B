@@ -4,4 +4,5 @@ compilacion: grammar.y lexer.l symbolTable.c
 	gcc -c grammar.tab.c
 	gcc -c lex.yy.c
 	gcc -c symbolTable.c
-	gcc lex.yy.o grammar.tab.o symbolTable.o -lfl -lm
+	gcc -c attribute.c
+	gcc lex.yy.o grammar.tab.o symbolTable.o attribute.o -lfl -lm

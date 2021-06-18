@@ -19,12 +19,13 @@
 "plus"          { return PLUS; }
 "minus"         { return MINUS; }
 "times"         { return TIMES; }
+"div_by"        { return DIV_BY; }
 ">"             { return SMALLER; }
 "<"             { return HIGHER; }
 "("             { return '('; }
 ")"             { return ')'; }
 
-[1-9][0-9]*     { yylval.NUMBER = atoi(yytext); return NUMBER; }
+0|[1-9][0-9]*     { yylval.NUMBER = atoi(yytext); return NUMBER; }
 [a-z][a-z0-9]*  {   symrec *s = getsym(yytext); 
                     if(!s){
                         s = putsym(yytext, IDENTIFIER);

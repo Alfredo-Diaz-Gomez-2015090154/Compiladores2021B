@@ -1,5 +1,3 @@
-
-
 struct symrec{
     char *name;
     int type;            //Tipo.(IDENTIFIER, NOUN, PROPERTY)
