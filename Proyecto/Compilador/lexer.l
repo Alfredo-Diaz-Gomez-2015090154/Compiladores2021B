@@ -1,5 +1,6 @@
 %{
 #include "symbolTable.h"
+#include "attribute.h"
 #include "grammar.tab.h"
 %}
 
