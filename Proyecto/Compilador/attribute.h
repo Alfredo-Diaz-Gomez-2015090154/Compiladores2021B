@@ -1,5 +1,5 @@
 enum NodeType{NodeT, NumberT, IdentifierT, ArithmeticOperationT, ParenthesesArithmeticOperationT, AssignNumberT, StatementListT, InputT,
-                MathLogicalExpressionT, LogicalExpressionOperationT, IfStatementT
+                MathLogicalExpressionT, LogicalExpressionOperationT, IfStatementT, WhileStatementT
             };
 
 extern NodeType;
@@ -76,6 +76,14 @@ struct IfStatementNode{
 
 typedef struct IfStatementNode IfStatementNode;
 
+struct WhileStatementNode{
+    int type;
+    Node *logicalExpression;
+    Node *statements;
+};
+
+typedef struct WhileStatementNode WhileStatementNode;
+
 
 Node *newNode(int type, Node *leftChild, Node *rightChild);
 Node *newNumberNode(int type, int value);
@@ -86,6 +94,7 @@ Node *newParenthesesArithmeticOperationNode(int type, Node *mathExpression);
 Node *newMathLogicalExpressionNode(int type, char *operation, Node *leftMathExpression, Node *rightMathExpression);
 Node *newLogicalExpressionOperationNode(int type, Node *leftLogicalExp, Node *rightLogicalExp, char *operation);
 Node *newIfStatementNode(int type, Node *logicalExpression, Node *statements);
+Node *newWhileStatementNode(int type, Node *logicalExpression, Node *statements);
 
 void generateCode(FILE *output, Node *node, int indentLevel);
 void generateCodeMathExpression(FILE *output, Node *mathExpression, int indentLevel);
@@ -93,6 +102,7 @@ void generateCodeMathLogicalExpression(FILE *output, Node *mathLogicalExpression
 void generateCodeLogicalExpression(FILE *output, Node *logicalExpression, int indentLevel);
 void generateCodeAssignNumber(FILE *output, Node *assignNumber, int indentLevel);
 void generateCodeIf(FILE *output, Node *ifNode, int indentLevel);
+void generateCodeWhile(FILE *output, Node *whileNode, int indentLevel);
 
 void writeTabs(FILE *fp, int tabNumber);
 

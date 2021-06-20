@@ -36,7 +36,7 @@ Node* tree;
 %token HIGHER SMALLER
 %token ON
 %nterm <Node*> math_expression assign_number statement statement_list s input line math_logical_expression logical_expression
-if_statement
+if_statement while_statement
 %nterm <symrec*> noun_expression
 
 //%precedence IS
@@ -87,7 +87,7 @@ statement:
 //|   has_op
 |   assign_number                                       { $$ = $1; }
 |   if_statement                                        { $$ = $1; }
-|   while_statement
+|   while_statement                                     { $$ = $1; }
 ;
 
 noun_expression:
@@ -212,7 +212,7 @@ if_statement:
 ;
 
 while_statement:
-    WHILE logical_expression THEN statement_list WHILE END
+    WHILE logical_expression THEN statement_list WHILE END  { $$ = newWhileStatementNode(WhileStatementT, $2, $4); }
 ;
 
 logical_expression:
@@ -241,12 +241,14 @@ math_logical_expression:
                                                         }
 |   math_expression SMALLER math_expression             { //Prototipo de regla semántica.
                                                             $$ = newMathLogicalExpressionNode(MathLogicalExpressionT, "<", $1, $3);
+                                                            printf("Smaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
                                                             printf("1.- Obtener/Calcular la primera 'math_expression'.\n");
                                                             printf("2.- Obtener/Calcular la segunda 'math_expression'.\n");
                                                             printf("3.- Evaluar si el valor de ambas 'math_expression' son iguales.\n");
                                                         }
 |   math_expression HIGHER math_expression              { //Prototipo de regla semántica.
                                                             $$ = newMathLogicalExpressionNode(MathLogicalExpressionT, ">", $1, $3);
+                                                            printf("Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiigh");
                                                             printf("1.- Obtener/Calcular la primera 'math_expression'.\n");
                                                             printf("2.- Obtener/Calcular la segunda 'math_expression'.\n");
                                                             printf("3.- Evaluar si valor .");

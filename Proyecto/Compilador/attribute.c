@@ -109,6 +109,14 @@ Node *newIfStatementNode(int type, Node *logicalExpression, Node *statements){
     return (Node*)newIf;
 }
 
+Node *newWhileStatementNode(int type, Node *logicalExpression, Node *statements){
+    WhileStatementNode *newWhile = (WhileStatementNode*)malloc(sizeof(WhileStatementNode));
+    newWhile->type = type;
+    newWhile->logicalExpression = logicalExpression;
+    newWhile->statements = statements;
+    return (Node*)newWhile;
+}
+
 void generateCode(FILE *output, Node *node, int indentLevel){
 
     printf("Generando código 'general'. Soy un %d\n", node->type);
@@ -145,6 +153,9 @@ void generateCode(FILE *output, Node *node, int indentLevel){
         case AssignNumberT:
             generateCodeAssignNumber(output, node, indentLevel);
         break;
+
+        case WhileStatementT:
+            generateCodeWhile(output, node, indentLevel);
 
     }
 
@@ -206,6 +217,14 @@ void generateCodeIf(FILE *output, Node *ifNode, int indentLevel){
     fprintf(output, ":\n");
     printf("    Generando statements... \n");
     generateCode(output, ((IfStatementNode*)ifNode)->statements, indentLevel + 1);
+}
+
+void generateCodeWhile(FILE *output, Node *whileNode, int indentLevel){
+    writeTabs(output, indentLevel);
+    fprintf(output, "while ");
+    generateCodeLogicalExpression(output, ((IfStatementNode*)whileNode)->logicalExpression, indentLevel);
+    fprintf(output, ":\n");
+    generateCode(output, ((IfStatementNode*)whileNode)->statements, indentLevel + 1);
 }
 
 void writeTabs(FILE *fp, int tabNumber){
