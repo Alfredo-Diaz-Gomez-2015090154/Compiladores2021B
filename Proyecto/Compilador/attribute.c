@@ -117,25 +117,29 @@ Node *newWhileStatementNode(int type, Node *logicalExpression, Node *statements)
     return (Node*)newWhile;
 }
 
+Node *newNPNode(int type, char *name, int isNot, struct NPNode *next){
+    NPNode *newNPNode = (NPNode*)malloc(sizeof(NPNode));
+    newNPNode->type = type;
+    newNPNode->name = strdup(name);
+    newNPNode->isNot = isNot;
+    newNPNode->next = next;
+    return (Node*)newNPNode;
+}
+
+Node *newIsStatementNode(int type, struct Node *nouns, struct Node *properties){
+    IsStatementNode *newIsNode = (IsStatementNode*)malloc(sizeof(IsStatementNode));
+    newIsNode->type = type;
+    newIsNode->nouns = (NPNode*)nouns;
+    newIsNode->properties = (NPNode*)properties;
+    return (Node*)newIsNode;
+}
+
 void generateCode(FILE *output, Node *node, int indentLevel){
 
-    printf("Generando código 'general'. Soy un %d\n", node->type);
+    //printf("Generando código 'general'. Soy un %d\n", node->type);
 
     switch(node->type){
         case InputT:
-            if(node->leftChild != NULL){
-                generateCode(output, node->leftChild, indentLevel);
-            }else{
-                printf("\tNulo izquierdo.\n");
-            }
-
-            if(node->rightChild != NULL){
-                generateCode(output, node->rightChild, indentLevel);
-            }else{
-                printf("\tNulo derecho.\n");
-            }        
-        break;
-
         case StatementListT:
             if(node->leftChild != NULL){
                 generateCode(output, node->leftChild, indentLevel);
@@ -143,8 +147,18 @@ void generateCode(FILE *output, Node *node, int indentLevel){
 
             if(node->rightChild != NULL){
                 generateCode(output, node->rightChild, indentLevel);
-            } 
+            }     
         break;
+
+        /*case StatementListT:
+            if(node->leftChild != NULL){
+                generateCode(output, node->leftChild, indentLevel);
+            }
+
+            if(node->rightChild != NULL){
+                generateCode(output, node->rightChild, indentLevel);
+            } 
+        break;*/
 
         case IfStatementT:
             generateCodeIf(output, node, indentLevel);
@@ -156,6 +170,12 @@ void generateCode(FILE *output, Node *node, int indentLevel){
 
         case WhileStatementT:
             generateCodeWhile(output, node, indentLevel);
+        break;
+
+        case IsStatementT:
+            //printf("Soy un IS :D\n");
+            generateCodeIsOp(output, node, indentLevel);
+        break;
 
     }
 
@@ -185,17 +205,17 @@ void generateCodeMathLogicalExpression(FILE *output, Node *mathLogicalExpression
 }
 
 void generateCodeLogicalExpression(FILE *output, Node *logicalExpression, int indentLevel){
-    printf("Generando logical expression... \n");
+    //printf("Generando logical expression... \n");
     if(logicalExpression->type == LogicalExpressionOperationT){
-        printf("    Generando logical expression compuesta... \n");
-        printf("        Generando logical expression izq... \n");
+        //printf("    Generando logical expression compuesta... \n");
+        //printf("        Generando logical expression izq... \n");
         generateCodeLogicalExpression(output, ((LogicalExpressionOperationNode*)logicalExpression)->leftLogicalExp, indentLevel);
-        printf("        Generando logical expression operador... \n");
+        //printf("        Generando logical expression operador... \n");
         fprintf(output, " %s ", ((LogicalExpressionOperationNode*)logicalExpression)->operation);
-        printf("        Generando logical expression izq... \n");
+        //printf("        Generando logical expression izq... \n");
         generateCodeLogicalExpression(output, ((LogicalExpressionOperationNode*)logicalExpression)->rightLogicalExp, indentLevel);
     }else if(logicalExpression->type == MathLogicalExpressionT){
-        printf("Generando math logical expression... \n");
+        //printf("Generando math logical expression... \n");
         generateCodeMathLogicalExpression(output, logicalExpression, indentLevel);
     }
 }
@@ -208,14 +228,14 @@ void generateCodeAssignNumber(FILE *output, Node *assignNumber, int indentLevel)
 }
 
 void generateCodeIf(FILE *output, Node *ifNode, int indentLevel){
-    printf("Generando if... \n");
+    //printf("Generando if... \n");
     writeTabs(output, indentLevel);
     fprintf(output, "if ");
-    printf("    Generando logical expression... \n");
+    //printf("    Generando logical expression... \n");
     generateCodeLogicalExpression(output, ((IfStatementNode*)ifNode)->logicalExpression, indentLevel);
-    printf("    Generando salto de línea... \n");
+    //printf("    Generando salto de línea... \n");
     fprintf(output, ":\n");
-    printf("    Generando statements... \n");
+    //printf("    Generando statements... \n");
     generateCode(output, ((IfStatementNode*)ifNode)->statements, indentLevel + 1);
 }
 
@@ -225,6 +245,53 @@ void generateCodeWhile(FILE *output, Node *whileNode, int indentLevel){
     generateCodeLogicalExpression(output, ((IfStatementNode*)whileNode)->logicalExpression, indentLevel);
     fprintf(output, ":\n");
     generateCode(output, ((IfStatementNode*)whileNode)->statements, indentLevel + 1);
+}
+
+void generateCodeIsOp(FILE *output, Node *isOpNode, int indentLevel){
+
+    fprintf(output, "\n");
+
+    for(NPNode *noun = ((IsStatementNode*)isOpNode)->nouns; noun; noun = noun->next){
+        writeTabs(output, indentLevel);
+        fprintf(output, "var %ss = get_tree().get_nodes_in_group('%s')\n", noun->name, noun->name);
+        writeTabs(output, indentLevel);
+        fprintf(output, "for %s_node in %ss:\n", noun->name, noun->name);
+        for(NPNode *property = ((IsStatementNode*)isOpNode)->properties; property; property = property->next){
+            //printf("Valor evaluación: %d\n", !(noun->isNot ^ property->isNot));
+            if(strcmp(property->name, "you") == 0){
+                generateCodeIsYou(output, noun->name, noun, property, indentLevel);
+            }else{
+                if(property->name)
+                writeTabs(output, indentLevel);
+                if(!(noun->isNot ^ property->isNot) == 1){
+                    fprintf(output, "\t%s_node.is_%s = true\n", noun->name, property->name);
+                }else{
+                    fprintf(output, "\t%s_node.is_%s = false\n", noun->name, property->name);
+                }
+                fprintf(output, "\n");
+            }
+        }
+        
+    }
+}
+
+void generateCodeIsYou(FILE *output, char *nounName, NPNode *noun, NPNode *property, int indentLevel){
+    if(!(noun->isNot ^ property->isNot) == 1){
+        writeTabs(output, indentLevel);
+        fprintf(output, "\tif !%s_node.is_in_group(\"you\"):\n", noun->name);
+        writeTabs(output, indentLevel);
+        fprintf(output, "\t\t%s_node.add_to_group(\"you\"):\n", noun->name);
+        writeTabs(output, indentLevel);
+        fprintf(output, "\t%s_node.is_you = true\n", noun->name);
+    }else{
+        writeTabs(output, indentLevel);
+        fprintf(output, "\tif %s_node.is_in_group(\"you\"):\n", noun->name);
+        writeTabs(output, indentLevel);
+        fprintf(output, "\t\t%s_node.remove_from_group(\"you\"):\n", noun->name);
+        writeTabs(output, indentLevel);
+        fprintf(output, "\t%s_node.is_you = false\n", noun->name);
+    }
+    fprintf(output, "\n");
 }
 
 void writeTabs(FILE *fp, int tabNumber){

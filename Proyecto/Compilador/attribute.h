@@ -1,8 +1,8 @@
 enum NodeType{NodeT, NumberT, IdentifierT, ArithmeticOperationT, ParenthesesArithmeticOperationT, AssignNumberT, StatementListT, InputT,
-                MathLogicalExpressionT, LogicalExpressionOperationT, IfStatementT, WhileStatementT
+                MathLogicalExpressionT, LogicalExpressionOperationT, IfStatementT, WhileStatementT, NPT, IsStatementT
             };
 
-extern NodeType;
+//extern NodeType;
 
 struct Node{
     int type;
@@ -84,6 +84,23 @@ struct WhileStatementNode{
 
 typedef struct WhileStatementNode WhileStatementNode;
 
+struct NPNode{
+    int type;
+    char *name;
+    int isNot;
+    struct NPNode *next;
+};
+
+typedef struct NPNode NPNode;
+
+struct IsStatementNode{
+    int type;
+    struct NPNode *nouns;
+    struct NPNode *properties;
+};
+
+typedef struct IsStatementNode IsStatementNode;
+
 
 Node *newNode(int type, Node *leftChild, Node *rightChild);
 Node *newNumberNode(int type, int value);
@@ -95,6 +112,8 @@ Node *newMathLogicalExpressionNode(int type, char *operation, Node *leftMathExpr
 Node *newLogicalExpressionOperationNode(int type, Node *leftLogicalExp, Node *rightLogicalExp, char *operation);
 Node *newIfStatementNode(int type, Node *logicalExpression, Node *statements);
 Node *newWhileStatementNode(int type, Node *logicalExpression, Node *statements);
+Node *newNPNode(int type, char *name, int isNot, struct NPNode *next);
+Node *newIsStatementNode(int type, struct Node *nouns, struct Node *properties);
 
 void generateCode(FILE *output, Node *node, int indentLevel);
 void generateCodeMathExpression(FILE *output, Node *mathExpression, int indentLevel);
@@ -103,23 +122,7 @@ void generateCodeLogicalExpression(FILE *output, Node *logicalExpression, int in
 void generateCodeAssignNumber(FILE *output, Node *assignNumber, int indentLevel);
 void generateCodeIf(FILE *output, Node *ifNode, int indentLevel);
 void generateCodeWhile(FILE *output, Node *whileNode, int indentLevel);
+void generateCodeIsOp(FILE *output, Node *isOpNode, int indentLevel);
+void generateCodeIsYou(FILE *output, char *nounName, NPNode *noun, NPNode *property, int indentLevel);
 
 void writeTabs(FILE *fp, int tabNumber);
-
-//NPNode = NounPropertyNoude.
-//Utilizado para el seguimiento de "Nouns" y "Properties" cuando se
-//sube en el árbol.
-struct NPNode{
-    char *name;
-    int isNot;
-    struct NPNode *next;
-};
-
-typedef struct NPNode NPNode;
-
-extern NPNode *nounList;
-extern NPNode *propertyList;
-
-NPNode *putNPNode(NPNode *list, char const *name, int isNot);
-NPNode *getNPNode(NPNode *list, char const *name);
-void freeNPList(NPNode *list);
