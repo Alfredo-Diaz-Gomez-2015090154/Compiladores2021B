@@ -6,8 +6,11 @@
 // <name>T; T al final por "Type".
 //enum NodeType{NodeT, NumberT, IdentifierT, ArithmeticOperationT, AssignNumberT, StatementListT, InputT};
 
+int error = 0;
+
 void yyerror(char *mensaje){
     printf("Error: %s\n", mensaje);
+    error = 1;
 }
 
 /*void writeTabs(FILE *fp, int tabNumber){
@@ -19,6 +22,7 @@ void yyerror(char *mensaje){
 enum NodeType;
 
 FILE *output;
+extern FILE *yyin;
 int identLevel = 1;
 Node* tree;
 
@@ -35,8 +39,8 @@ Node* tree;
 %token VAR
 %token HIGHER SMALLER
 %token ON
-%nterm <Node*> math_expression assign_number statement statement_list s input line math_logical_expression logical_expression
-if_statement while_statement noun_expression property_expression is_op
+%nterm <Node*> math_expression assign_number statement statement_list s input math_logical_expression logical_expression
+if_statement while_statement noun_expression property_expression is_op modify_variable
 
 //%precedence IS
 //%left MINUS PLUS OR
@@ -64,20 +68,26 @@ s:
                                                         }
 ;
 
+
 input:
     %empty                                              { $$ = NULL; }
-|   input line                                          { $$ = newNode(InputT, $1, $2); }
+|   input statement_list                                { $$ = newNode(InputT, $1, $2); }
 ;
 
-line:
+/*line:
     '\n'                                                { $$ = NULL; }
-|   statement_list '\n'                                 { $$ = $1; }
-|   error '\n'                                          { yyerror; }
-;
+|   statement_list                                      { $$ = $1; }
+//|   error '\n'                                        { yyerror; }
+;*/
+
+space:
+    '\n'
+| %empty
+;    
 
 statement_list:
-    statement                                           { $$ = $1; }
-|   statement_list statement                            { $$ = newNode(StatementListT, $1, $2 ); }
+    statement space                                      { $$ = $1; }
+|   statement_list statement space                       { $$ = newNode(StatementListT, $1, $2 ); }
 ;
 
 statement:
@@ -85,6 +95,7 @@ statement:
 |   assign_number                                       { $$ = $1; }
 |   if_statement                                        { $$ = $1; }
 |   while_statement                                     { $$ = $1; }
+|   modify_variable                                     { $$ = $1; }
 //|   make_op
 //|   has_op
 ;
@@ -112,7 +123,25 @@ is_op:
 ;
 
 assign_number:
-    VAR IDENTIFIER IS math_expression                   { $$ = newAssignNumberNode(AssignNumberT, $2->name, $4); }          
+    VAR IDENTIFIER IS math_expression                   {
+                                                          $2->value.var = 1; 
+                                                          $$ = newAssignNumberNode(AssignNumberT, $2->name, $4); 
+                                                        }
+;
+
+modify_variable:
+   IDENTIFIER IS math_expression                        {
+                                                          //printf("Valor : %d?\n", $1->value.var);
+                                                          if($1->value.var == 1){
+                                                              //printf("Encontrada!\n");
+                                                              $$ = newModifyVariableNode(ModifyVariableT, $1->name, $3);
+                                                          }else{
+                                                              char bufferFormatedStr[50];
+                                                              int n = sprintf(bufferFormatedStr, "Variable %s no definida.", $1->name);
+                                                              yyerror(bufferFormatedStr);
+                                                          } 
+                                                           
+                                                        }
 ;
 
 math_expression:
@@ -122,23 +151,23 @@ math_expression:
 |   math_expression PLUS math_expression                { //Prototipo de regla semántica.
                                                         //    printf("Suma: %d\n", ($1 + $3));
                                                             //fprintf(output, "+ ");       
-                                                            printf("1.- Calcular/Obtener el valor de la primera 'math_expression'.\n");
-                                                            printf("2.- Calcular/Obtener el valor de la segunda 'math_expression'.\n");
-                                                            printf("3.- Evaluar la suma de ambas 'math_expression'.\n");
+                                                            //printf("1.- Calcular/Obtener el valor de la primera 'math_expression'.\n");
+                                                            //printf("2.- Calcular/Obtener el valor de la segunda 'math_expression'.\n");
+                                                            //printf("3.- Evaluar la suma de ambas 'math_expression'.\n");
                                                             $$ = newArithmeticOperationNode(ArithmeticOperationT, '+', $1, $3);
                                                         }
 |   math_expression MINUS math_expression               { //Prototipo de regla semántica.
                                                             //fprintf(output, "- ");
-                                                            printf("1.- Calcular/Obtener el valor de la primera 'math_expression'.\n");
-                                                            printf("2.- Calcular/Obtener el valor de la segunda 'math_expression'.\n");
-                                                            printf("3.- Evaluar la diferencia de la primera 'math_expression' y la segunda 'math_expression'.\n");
+                                                            //printf("1.- Calcular/Obtener el valor de la primera 'math_expression'.\n");
+                                                            //printf("2.- Calcular/Obtener el valor de la segunda 'math_expression'.\n");
+                                                            //printf("3.- Evaluar la diferencia de la primera 'math_expression' y la segunda 'math_expression'.\n");
                                                             $$ = newArithmeticOperationNode(ArithmeticOperationT, '-', $1, $3);
                                                         }
 |   math_expression TIMES math_expression               { //Prototipo de regla semántica.
                                                             //fprintf(output, "* ");
-                                                            printf("1.- Calcular/Obtener el valor de la primera 'math_expression'.\n");
-                                                            printf("2.- Calcular/Obtener el valor de la segunda 'math_expression'.\n");
-                                                            printf("3.- Evaluar el producto de ambas 'math_expression'.\n");
+                                                            //printf("1.- Calcular/Obtener el valor de la primera 'math_expression'.\n");
+                                                            //printf("2.- Calcular/Obtener el valor de la segunda 'math_expression'.\n");
+                                                            //printf("3.- Evaluar el producto de ambas 'math_expression'.\n");
                                                             $$ = newArithmeticOperationNode(ArithmeticOperationT, '*', $1, $3);
                                                         }
 |   math_expression DIV_BY math_expression              { //Prototipo de regla semántica.
@@ -158,11 +187,11 @@ math_expression:
 ;
 
 if_statement:
-    IF logical_expression THEN statement_list IF END        { $$ = newIfStatementNode(IfStatementT, $2, $4); }
+    IF logical_expression THEN space statement_list IF END        { $$ = newIfStatementNode(IfStatementT, $2, $5); }
 ;
 
 while_statement:
-    WHILE logical_expression THEN statement_list WHILE END  { $$ = newWhileStatementNode(WhileStatementT, $2, $4); }
+    WHILE logical_expression THEN space statement_list WHILE END  { $$ = newWhileStatementNode(WhileStatementT, $2, $5); }
 ;
 
 logical_expression:
@@ -251,25 +280,32 @@ static void init_table(void){
 
 }
 
-int main(){
+int main(int argc, char **argv){
 
-    output = fopen("RuleChanger.gd", "w");
+    if(argc == 2){
 
-    if(output == NULL){
-        printf("Error al abrir el archivo.");
-    }else{
-        //printf("Excribiendo en archivo.\n");
-        fputs("extends Node\n\n", output);
-        fputs("func rule_changer():\n", output);
-        //printf("Escritura realizada.\n");
+        //Wortspiel = .wtsl
+        yyin = fopen(argv[1], "r");
 
-        init_table();
-        yyparse();
+        if(yyin == NULL){
+            printf("Error al abrir el archivo.\n");
+        }else{
 
-        //printf("\nTipo: %d\n", tree->type);
-        generateCode(output, tree, 1);
+            init_table();
+            yyparse();
 
-        fclose(output);  
+            if(error == 0){
+                output = fopen("RuleChanger.gd", "w");
+                fputs("extends Node\n\n", output);
+                fputs("func rule_changer():\n", output);
+                fputs("\tvar world_controller_node = get_tree().get_nodes_in_group(\"world_controller\")[0]\n", output);
+                generateCode(output, tree, 1);
+                fclose(output);  
+            }
+            
+            //freeSymbolTable();
+            fclose(yyin);
+        }
     }
 
     return 0;

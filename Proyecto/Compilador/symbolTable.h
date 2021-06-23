@@ -13,3 +13,4 @@ extern symrec *sym_table;
 
 symrec *putsym(char const *name, int sym_type);
 symrec *getsym(char const *name);
+void freeSymbolTable();

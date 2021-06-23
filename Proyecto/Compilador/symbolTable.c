@@ -1,5 +1,6 @@
 #include <stdlib.h> //Malloc, Realloc.
 #include <string.h> //strlen
+#include <stdio.h>
 #include "symbolTable.h"
 
 symrec *putsym(char const *name, int sym_type){
@@ -19,4 +20,16 @@ symrec *getsym(char const *name){
         }
     }
     return NULL;
+}
+
+void freeSymbolTable(){
+    printf("%s\n", sym_table->name);
+    symrec *nextSymbol = nextSymbol->next;
+    while(nextSymbol){
+        free(sym_table);
+        sym_table = nextSymbol;
+        printf("%s\n", sym_table->name);
+        symrec *nextSymbol = nextSymbol->next;
+    }
+    free(sym_table);
 }

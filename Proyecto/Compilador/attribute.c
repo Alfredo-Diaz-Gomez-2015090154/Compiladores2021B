@@ -5,37 +5,6 @@
 
 enum NodeType;
 
-NPNode *putNPNode(NPNode *list, char const *name, int isNot){
-    printf("Creando nodo\n");
-    NPNode *newNoun = (NPNode*)malloc(sizeof(NPNode));
-    newNoun->name = strdup(name);
-    newNoun->isNot = isNot;
-    printf("Asignando siguiente\n");
-    newNoun->next = list;
-    printf("Nueva cabeza\n");
-    //list = newNoun;
-    return newNoun;
-}
-
-NPNode *getNPNode(NPNode *list, char const *name){
-    for(NPNode *noun = list; noun; noun = noun->next){
-        if(strcmp(noun->name, name) == 0){
-            return noun;
-        }
-        return NULL;
-    }
-}
-
-void freeNPList(NPNode *list){
-    NPNode *nextNoun = list->next;
-    while(nextNoun){
-        free(list);
-        list = nextNoun;
-        nextNoun = list->next;
-    }
-    free(list);
-}
-
 
 Node *newNode(int type, Node *leftChild, Node *rightChild){
     Node *newNode = (Node*)malloc(sizeof(Node));
@@ -74,6 +43,14 @@ Node *newAssignNumberNode(int type, char *name, Node *mathExpression){
     newAssignNumber->name = strdup(name);
     newAssignNumber->mathExpression = mathExpression;
     return (Node*)newAssignNumber;
+}
+
+Node *newModifyVariableNode(int type, char *name, Node *mathExpression){
+    ModifyVariableNode *newModifyVariable = (ModifyVariableNode*)malloc(sizeof(ModifyVariableNode));
+    newModifyVariable->type = type;
+    newModifyVariable->name = strdup(name);
+    newModifyVariable->mathExpression = mathExpression;
+    return (Node*)newModifyVariable;    
 }
 
 Node *newParenthesesArithmeticOperationNode(int type, Node *mathExpression){
@@ -168,6 +145,10 @@ void generateCode(FILE *output, Node *node, int indentLevel){
             generateCodeAssignNumber(output, node, indentLevel);
         break;
 
+        case ModifyVariableT:
+            generateCodeModifyVariable(output, node, indentLevel);
+        break;
+
         case WhileStatementT:
             generateCodeWhile(output, node, indentLevel);
         break;
@@ -227,6 +208,13 @@ void generateCodeAssignNumber(FILE *output, Node *assignNumber, int indentLevel)
     fprintf(output, "\n");
 }
 
+void generateCodeModifyVariable(FILE *output, Node *modifyNumber, int indentLevel){
+    writeTabs(output, indentLevel);
+    fprintf(output, "%s = ", ((ModifyVariableNode*)modifyNumber)->name);
+    generateCodeMathExpression(output, ((ModifyVariableNode*)modifyNumber)->mathExpression, indentLevel);
+    fprintf(output, "\n");    
+}
+
 void generateCodeIf(FILE *output, Node *ifNode, int indentLevel){
     //printf("Generando if... \n");
     writeTabs(output, indentLevel);
@@ -245,6 +233,8 @@ void generateCodeWhile(FILE *output, Node *whileNode, int indentLevel){
     generateCodeLogicalExpression(output, ((IfStatementNode*)whileNode)->logicalExpression, indentLevel);
     fprintf(output, ":\n");
     generateCode(output, ((IfStatementNode*)whileNode)->statements, indentLevel + 1);
+    writeTabs(output, indentLevel);
+    fprintf(output, "\tyield(world_controller_node, \"movement_s\")");
 }
 
 void generateCodeIsOp(FILE *output, Node *isOpNode, int indentLevel){

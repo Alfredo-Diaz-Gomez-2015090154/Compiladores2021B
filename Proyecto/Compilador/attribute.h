@@ -1,5 +1,6 @@
-enum NodeType{NodeT, NumberT, IdentifierT, ArithmeticOperationT, ParenthesesArithmeticOperationT, AssignNumberT, StatementListT, InputT,
-                MathLogicalExpressionT, LogicalExpressionOperationT, IfStatementT, WhileStatementT, NPT, IsStatementT
+enum NodeType{NodeT, NumberT, IdentifierT, ArithmeticOperationT, ParenthesesArithmeticOperationT, AssignNumberT, ModifyVariableT, 
+                StatementListT, InputT, MathLogicalExpressionT, LogicalExpressionOperationT, IfStatementT, WhileStatementT, NPT, 
+                IsStatementT
             };
 
 //extern NodeType;
@@ -42,6 +43,14 @@ struct AssignNumberNode{
 };
 
 typedef struct AssignNumberNode AssignNumberNode;
+
+struct ModifyVariableNode{
+    int type;
+    char *name;
+    Node *mathExpression;
+};
+
+typedef struct ModifyVariableNode ModifyVariableNode;
 
 struct ParenthesesArithmeticOperationNode{
     int type;
@@ -114,12 +123,14 @@ Node *newIfStatementNode(int type, Node *logicalExpression, Node *statements);
 Node *newWhileStatementNode(int type, Node *logicalExpression, Node *statements);
 Node *newNPNode(int type, char *name, int isNot, struct NPNode *next);
 Node *newIsStatementNode(int type, struct Node *nouns, struct Node *properties);
+Node *newModifyVariableNode(int type, char *name, Node *mathExpression);
 
 void generateCode(FILE *output, Node *node, int indentLevel);
 void generateCodeMathExpression(FILE *output, Node *mathExpression, int indentLevel);
 void generateCodeMathLogicalExpression(FILE *output, Node *mathLogicalExpression, int indentLevel);
 void generateCodeLogicalExpression(FILE *output, Node *logicalExpression, int indentLevel);
 void generateCodeAssignNumber(FILE *output, Node *assignNumber, int indentLevel);
+void generateCodeModifyVariable(FILE *output, Node *modifyNumber, int indentLevel);
 void generateCodeIf(FILE *output, Node *ifNode, int indentLevel);
 void generateCodeWhile(FILE *output, Node *whileNode, int indentLevel);
 void generateCodeIsOp(FILE *output, Node *isOpNode, int indentLevel);
